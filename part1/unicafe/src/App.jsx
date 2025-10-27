@@ -4,6 +4,14 @@ const Button = ({ onClick, text }) => <button onClick={onClick}>{text}</button>;
 
 const Statistics = ({ good, neutral, bad }) => {
   const all = good + neutral + bad;
+  if (all === 0) {
+    return (
+      <>
+        <h1>Statistics</h1>
+        <p>No feedback given</p>
+      </>
+    );
+  }
   const average = () => {
     if (all == 0) {
       return 0;
