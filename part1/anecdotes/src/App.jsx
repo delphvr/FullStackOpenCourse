@@ -2,10 +2,12 @@ import { useState } from "react";
 
 const Button = ({ onClick, text }) => <button onClick={onClick}>{text}</button>;
 
-//source https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
-function getRandomInt(max) {
-  return Math.floor(Math.random() * max);
-}
+const DisplayVote = ({ vote }) => {
+  if (vote <= 1) {
+    return <p>has {vote} vote</p>;
+  }
+  return <p>has {vote} votes</p>;
+};
 
 const App = () => {
   const anecdotes = [
@@ -20,15 +22,28 @@ const App = () => {
   ];
 
   const [selected, setSelected] = useState(0);
+  const [votes, setVotes] = useState(Array(anecdotes.length).fill(0));
+
+  //source https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+  }
+
+  const handleVoteClick = () => {
+    const newVotes = { ...votes };
+    newVotes[selected] += 1;
+    setVotes(newVotes);
+  };
 
   return (
     <div>
       <p>{anecdotes[selected]}</p>
-
+      <DisplayVote vote={votes[selected]} />
       <Button
         onClick={() => setSelected(getRandomInt(anecdotes.length))}
         text={"next anecdote"}
       />
+      <Button onClick={handleVoteClick} text={"vote"} />
     </div>
   );
 };
