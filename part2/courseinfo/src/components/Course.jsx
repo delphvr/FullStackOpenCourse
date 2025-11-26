@@ -1,4 +1,4 @@
-const Header = (props) => <h1>{props.course}</h1>;
+const Header = (props) => <h2>{props.course}</h2>;
 
 const Content = (props) => (
   <div>
@@ -17,12 +17,20 @@ const Part = (props) => (
 
 const Total = (props) => <strong>Total of {props.total} exercises</strong>;
 
-const Course = ({ course }) => {
+const Course = ({ courses }) => {
   return (
     <div>
-      <Header course={course.name} />
-      <Content parts={course.parts} />
-      <Total total={course.parts.reduce((sum, e) => sum + e.exercises, 0)} />
+      {courses.map((course) => {
+        return (
+          <>
+            <Header course={course.name} />
+            <Content parts={course.parts} />
+            <Total
+              total={course.parts.reduce((sum, e) => sum + e.exercises, 0)}
+            />
+          </>
+        );
+      })}
     </div>
   );
 };
