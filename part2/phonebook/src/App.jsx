@@ -26,12 +26,29 @@ const App = () => {
     setFilter(event.target.value);
   };
 
+  const updatePerson = (id, updatedPerson) => {
+    personService
+      .update(id, updatedPerson)
+      .then((person) =>
+        setPersons(persons.map((p) => (p.id === person.id ? person : p))),
+      );
+    setNewName("");
+    setNewNumber("");
+  };
+
   const addPerson = (event) => {
     event.preventDefault();
-    if (persons.find((person) => person.name === newName)) {
-      alert(`${newName} is already added to phonebook`);
+    const newPersonObj = { name: newName, number: newNumber };
+    const personExist = persons.find((person) => person.name === newName);
+    if (personExist) {
+      if (
+        window.confirm(
+          `${newName} is already added to phonebook, replace the old number with a new one?`,
+        )
+      ) {
+        updatePerson(personExist.id, newPersonObj);
+      }
     } else {
-      const newPersonObj = { name: newName, number: newNumber };
       personService
         .create(newPersonObj)
         .then((response) => setPersons(persons.concat(response)));
