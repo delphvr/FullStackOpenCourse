@@ -3,12 +3,14 @@ import Persons from "./components/Persons";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import personService from "./services/persons";
+import Notification from "./components/Notification";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
+  const [message, setMessage] = useState(null);
 
   useEffect(() => {
     personService.getAll().then((initialPersons) => setPersons(initialPersons));
@@ -31,7 +33,17 @@ const App = () => {
       .update(id, updatedPerson)
       .then((person) =>
         setPersons(persons.map((p) => (p.id === person.id ? person : p))),
-      );
+      )
+      .catch((error) => {
+        setMessage({
+          text: `Information of ${updatedPerson.name} has already been removed from server`,
+          isSuccess: false,
+        });
+        setTimeout(() => {
+          setMessage(null);
+        }, 5000);
+        setPersons(persons.filter((p) => p.id !== id));
+      });
     setNewName("");
     setNewNumber("");
   };
@@ -47,11 +59,22 @@ const App = () => {
         )
       ) {
         updatePerson(personExist.id, newPersonObj);
+        setMessage({
+          text: `Updated ${newName} phone number`,
+          isSuccess: true,
+        });
+        setTimeout(() => {
+          setMessage(null);
+        }, 5000);
       }
     } else {
       personService
         .create(newPersonObj)
         .then((response) => setPersons(persons.concat(response)));
+      setMessage({ text: `Added ${newName}`, isSuccess: true });
+      setTimeout(() => {
+        setMessage(null);
+      }, 5000);
       setNewName("");
       setNewNumber("");
     }
@@ -63,7 +86,17 @@ const App = () => {
         .deletePerson(id)
         .then((deletedPerson) =>
           setPersons(persons.filter((p) => p.id !== deletedPerson.id)),
-        );
+        )
+        .catch((error) => {
+          setMessage({
+            text: `Information of ${name} has already been removed from server`,
+            isSuccess: false,
+          });
+          setTimeout(() => {
+            setMessage(null);
+          }, 5000);
+          setPersons(persons.filter((p) => p.id !== id));
+        });
     }
   };
 
@@ -74,6 +107,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} />
       <Filter value={filter} onChange={handleFilterChange} />
       <h2>Add a new</h2>
       <PersonForm
