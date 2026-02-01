@@ -5,7 +5,7 @@ import countriesService from "./services/countries";
 const App = () => {
   const [search, setSearch] = useState("");
   const [allCountries, setAllCountries] = useState([]);
-  //const [response, setResponse] = useState("");
+  const [countriesToShow, setCountriesToShow] = useState([]);
 
   useEffect(() => {
     countriesService
@@ -14,34 +14,41 @@ const App = () => {
   }, []);
 
   const handleSearchChange = (event) => {
-    setSearch(event.target.value);
+    const newSearchValue = event.target.value;
+    setSearch(newSearchValue);
+    setCountriesToShow(
+      newSearchValue === ""
+        ? []
+        : allCountries.filter((country) =>
+            country.name.official
+              .toLowerCase()
+              .includes(newSearchValue.toLowerCase()),
+          ),
+    );
   };
 
-  const countriesFound =
-    search === ""
-      ? []
-      : allCountries.filter((country) =>
-          country.name.official.toLowerCase().includes(search.toLowerCase()),
-        );
-
-  console.log(countriesFound);
+  const showContry = (country) => {
+    setCountriesToShow([country]);
+  };
 
   const getResponse = () => {
-    console.log("getting res", countriesFound.length);
-    if (countriesFound.length > 10) {
+    if (countriesToShow.length > 10) {
       return <div>Too many matches, specify another filter</div>;
-    } else if (countriesFound.length > 1) {
+    } else if (countriesToShow.length > 1) {
       return (
         <div>
-          {countriesFound.map((country) => (
-            <div key={country.name.official}>{country.name.official}</div>
+          {countriesToShow.map((country) => (
+            <div key={country.name.official}>
+              {country.name.official}{" "}
+              <button onClick={() => showContry(country)}>Show</button>
+            </div>
           ))}
         </div>
       );
     } else {
       return (
         <Country
-          data={countriesFound.length > 0 ? countriesFound[0] : undefined}
+          data={countriesToShow.length > 0 ? countriesToShow[0] : undefined}
         />
       );
     }
