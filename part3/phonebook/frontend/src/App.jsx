@@ -84,9 +84,7 @@ const App = () => {
     if (window.confirm(`Delete ${name} ?`)) {
       personService
         .deletePerson(id)
-        .then((deletedPerson) =>
-          setPersons(persons.filter((p) => p.id !== deletedPerson.id)),
-        )
+        .then((_) => setPersons(persons.filter((p) => p.id !== id)))
         .catch((error) => {
           setMessage({
             text: `Information of ${name} has already been removed from server`,

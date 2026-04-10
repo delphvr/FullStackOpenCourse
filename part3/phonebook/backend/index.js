@@ -15,28 +15,14 @@ morgan.token("post", function (req, res) {
   if (req.method === "POST") return JSON.stringify(req.body);
 });
 
-let persons = [
-  {
-    id: "1",
-    name: "Arto Hellas",
-    number: "040-123456",
-  },
-  {
-    id: "2",
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-  },
-  {
-    id: "3",
-    name: "Dan Abramov",
-    number: "12-43-234345",
-  },
-  {
-    id: "4",
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
-  },
-];
+const updatePersons = () => {
+  Person.find({}).then((p) => {
+    persons = p;
+  });
+};
+
+let persons = [];
+updatePersons();
 
 app.get("/info", (request, response) => {
   const receivedDate = new Date();
@@ -64,8 +50,11 @@ app.get("/api/persons/:id", (request, response) => {
 
 app.delete("/api/persons/:id", (request, response) => {
   const id = request.params.id;
-  persons = persons.filter((person) => person.id !== id);
-  response.status(204).end();
+  Person.deleteOne({ _id: id }).then((p) => {
+    console.log(p);
+    updatePersons();
+    response.status(204).end();
+  });
 });
 
 app.post("/api/persons", (request, response) => {
@@ -90,12 +79,32 @@ app.post("/api/persons", (request, response) => {
     });
   }
 
-  const randomId = Math.floor(Math.random() * 200000);
-  person.id = String(randomId);
+  const p = new Person({
+    name: person.name,
+    number: person.number,
+  });
 
-  persons = persons.concat(person);
+  p.save().then((savedPerson) => {
+    persons = persons.concat(savedPerson);
+    response.json(savedPerson);
+  });
+});
 
-  response.json(person);
+app.put("/api/persons/:id", (request, response) => {
+  const id = request.params.id;
+  const person = request.body;
+  Person.findByIdAndUpdate(
+    id,
+    {
+      name: person.name,
+      number: person.number,
+    },
+    { new: true },
+  ).then((p) => {
+    updatePersons();
+    console.log(p);
+    response.json(p);
+  });
 });
 
 const PORT = process.env.PORT;
