@@ -50,8 +50,7 @@ app.get("/api/persons/:id", (request, response) => {
 
 app.delete("/api/persons/:id", (request, response) => {
   const id = request.params.id;
-  Person.deleteOne({ _id: id }).then((p) => {
-    console.log(p);
+  Person.findByIdAndDelete({ _id: id }).then((p) => {
     updatePersons();
     response.status(204).end();
   });
