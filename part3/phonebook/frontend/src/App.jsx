@@ -29,7 +29,7 @@ const App = () => {
   };
 
   const updatePerson = (id, updatedPerson) => {
-    personService
+    return personService
       .update(id, updatedPerson)
       .then((person) =>
         setPersons(persons.map((p) => (p.id === person.id ? person : p))),
@@ -44,8 +44,6 @@ const App = () => {
         }, 5000);
         setPersons(persons.filter((p) => p.id !== id));
       });
-    setNewName("");
-    setNewNumber("");
   };
 
   const addPerson = (event) => {
@@ -58,25 +56,40 @@ const App = () => {
           `${newName} is already added to phonebook, replace the old number with a new one?`,
         )
       ) {
-        updatePerson(personExist.id, newPersonObj);
-        setMessage({
-          text: `Updated ${newName} phone number`,
-          isSuccess: true,
+        updatePerson(personExist.id, newPersonObj).then(() => {
+          setMessage({
+            text: `Updated ${newName} phone number`,
+            isSuccess: true,
+          });
+          setTimeout(() => {
+            setMessage(null);
+          }, 5000);
+
+          setNewName("");
+          setNewNumber("");
         });
-        setTimeout(() => {
-          setMessage(null);
-        }, 5000);
       }
     } else {
       personService
         .create(newPersonObj)
-        .then((response) => setPersons(persons.concat(response)));
-      setMessage({ text: `Added ${newName}`, isSuccess: true });
-      setTimeout(() => {
-        setMessage(null);
-      }, 5000);
-      setNewName("");
-      setNewNumber("");
+        .then((response) => {
+          setPersons(persons.concat(response));
+          setMessage({ text: `Added ${newName}`, isSuccess: true });
+          setTimeout(() => {
+            setMessage(null);
+          }, 5000);
+          setNewName("");
+          setNewNumber("");
+        })
+        .catch((error) => {
+          setMessage({
+            text: `${error.response?.data?.error}`,
+            isSuccess: false,
+          });
+          setTimeout(() => {
+            setMessage(null);
+          }, 5000);
+        });
     }
   };
 

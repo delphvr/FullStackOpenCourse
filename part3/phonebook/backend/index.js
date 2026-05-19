@@ -22,6 +22,12 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).send({ error: "malformatted id" });
   }
 
+  if (error.name === "ValidationError") {
+    return response.status(400).json({
+      error: error.message,
+    });
+  }
+
   next(error);
 };
 
@@ -88,13 +94,13 @@ app.post("/api/persons", (request, response, next) => {
           error: "name must be unique",
         });
       } else {
-        const p = new Person({
+        const newPerson = new Person({
           name: person.name,
           number: person.number,
         });
 
-        p.save().then((savedPerson) => {
-          return response.json(savedPerson);
+        return newPerson.save().then((savedPerson) => {
+          response.json(savedPerson);
         });
       }
     })
@@ -110,7 +116,7 @@ app.put("/api/persons/:id", (request, response, next) => {
       name: person.name,
       number: person.number,
     },
-    { new: true },
+    { new: true, runValidators: true },
   )
     .then((p) => {
       response.json(p);
